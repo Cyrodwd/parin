@@ -1222,10 +1222,10 @@ FontId loadFontFromTexture(IStr path, int tileWidth, int tileHeight) {
 /// The resource must be manually freed.
 /// Supports both forward slashes and backslashes in file paths.
 @trusted
-Result!Sound loadRawSound(IStr path, float volume, float pitch) {
+Result!Sound loadRawSound(IStr path, float volume, float pitch, bool loop) {
     auto targetPath = canUseAssetsPath ? path.toAssetsPath() : path;
     auto value = Sound();
-    if (path.endsWith(".wav")) {
+    if (endsWith(path, ".wav") || !loop) {
         value.data = rl.LoadSound(targetPath.toCStr().getOr());
     } else {
         value.data = rl.LoadMusicStream(targetPath.toCStr().getOr());
@@ -1238,8 +1238,8 @@ Result!Sound loadRawSound(IStr path, float volume, float pitch) {
 /// Loads a sound file (WAV, OGG, MP3) from the assets folder.
 /// The resource is managed by the engine and can be freed manually or with the `freeResources` function.
 /// Supports both forward slashes and backslashes in file paths.
-SoundId loadSound(IStr path, float volume, float pitch) {
-    if (auto resource = loadRawSound(path, volume, pitch)) {
+SoundId loadSound(IStr path, float volume = 1.0f, float pitch = 1.0f, bool loop = true) {
+    if (auto resource = loadRawSound(path, volume, pitch, loop)) {
         auto id = SoundId(engineState.sounds.append(resource.get()));
         id.data.value += 1;
         return id;
